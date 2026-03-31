@@ -7,24 +7,22 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#0f0f13" />
   <title>My Transcriber</title>
-  <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;My Transcriber&quot;,&quot;short_name&quot;:&quot;Transcriber&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%230f0f13&quot;,&quot;theme_color&quot;:&quot;%230f0f13&quot;}" />
   <style>
-    /* ── Reset & base ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #0f0f13;
-      --surface:   #1a1a23;
-      --surface2:  #22222e;
-      --border:    #2e2e3e;
-      --accent:    #6c63ff;
-      --accent-h:  #8880ff;
-      --success:   #22c55e;
-      --danger:    #ef4444;
-      --text:      #e8e8f0;
-      --text-dim:  #888899;
-      --radius:    12px;
-      --radius-sm: 8px;
+      --bg:       #0f0f13;
+      --surface:  #1a1a23;
+      --surface2: #22222e;
+      --border:   #2e2e3e;
+      --accent:   #6c63ff;
+      --accent-h: #8880ff;
+      --success:  #22c55e;
+      --danger:   #ef4444;
+      --text:     #e8e8f0;
+      --dim:      #888899;
+      --r:        12px;
+      --rs:       8px;
     }
 
     html, body {
@@ -38,14 +36,10 @@
     }
 
     /* ── Screens ── */
-    .screen {
-      display: none;
-      width: 100%;
-      min-height: 100dvh;
-    }
+    .screen { display: none; width: 100%; min-height: 100vh; }
     .screen.active { display: flex; }
 
-    /* ── Password screen ── */
+    /* ── Lock screen ── */
     #lock-screen {
       flex-direction: column;
       align-items: center;
@@ -66,37 +60,23 @@
     .lock-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: var(--r);
       padding: 32px 28px;
-      width: 100%;
-      max-width: 360px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+      width: 100%; max-width: 360px;
+      display: flex; flex-direction: column; gap: 20px;
     }
+    .lock-card h1 { font-size: 1.4rem; font-weight: 700; text-align: center; }
+    .lock-card p  { text-align: center; color: var(--dim); font-size: 0.875rem; }
 
-    .lock-card h1 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      text-align: center;
-      letter-spacing: -0.02em;
-    }
+    .error-msg { color: var(--danger); font-size: 0.8rem; text-align: center; min-height: 1.2em; }
 
-    .lock-card p {
-      text-align: center;
-      color: var(--text-dim);
-      font-size: 0.875rem;
-    }
-
-    .input-group {
-      position: relative;
-    }
-
+    /* ── Inputs ── */
+    .input-wrap { position: relative; }
     input[type="password"], input[type="text"] {
       width: 100%;
       background: var(--surface2);
       border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
+      border-radius: var(--rs);
       color: var(--text);
       font-size: 1rem;
       padding: 13px 44px 13px 14px;
@@ -104,270 +84,205 @@
       transition: border-color 0.2s;
       -webkit-appearance: none;
     }
-    input[type="password"]:focus, input[type="text"]:focus {
-      border-color: var(--accent);
-    }
+    input:focus { border-color: var(--accent); }
+    input::placeholder { color: var(--dim); }
 
-    .toggle-pw {
-      position: absolute;
-      right: 12px; top: 50%;
+    .eye-btn {
+      position: absolute; right: 12px; top: 50%;
       transform: translateY(-50%);
       background: none; border: none;
-      color: var(--text-dim); cursor: pointer;
-      padding: 4px;
+      color: var(--dim); cursor: pointer; padding: 4px;
       display: flex; align-items: center;
     }
-    .toggle-pw:hover { color: var(--text); }
-
-    .error-msg {
-      color: var(--danger);
-      font-size: 0.8rem;
-      text-align: center;
-      min-height: 1.2em;
-    }
+    .eye-btn:hover { color: var(--text); }
 
     /* ── Buttons ── */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border: none;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-size: 0.9375rem;
-      font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px; border: none; border-radius: var(--rs);
+      cursor: pointer; font-size: 0.9375rem; font-weight: 600;
       padding: 13px 20px;
       transition: opacity 0.15s, transform 0.1s, background 0.15s;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
-    .btn:active { transform: scale(0.97); }
-    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
-
-    .btn-primary { background: var(--accent); color: #fff; width: 100%; }
+    .btn:active:not(:disabled) { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary  { background: var(--accent); color: #fff; width: 100%; }
     .btn-primary:hover:not(:disabled) { background: var(--accent-h); }
-
     .btn-secondary {
-      background: var(--surface2);
-      color: var(--text);
-      border: 1.5px solid var(--border);
-      flex: 1;
+      background: var(--surface2); color: var(--text);
+      border: 1.5px solid var(--border); flex: 1;
     }
     .btn-secondary:hover:not(:disabled) { background: var(--border); }
-
     .btn-success { background: var(--success); color: #fff; flex: 1; }
     .btn-success:hover:not(:disabled) { background: #16a34a; }
+    .icon-btn {
+      background: none; border: 1.5px solid var(--border);
+      border-radius: var(--rs); color: var(--dim); cursor: pointer;
+      padding: 7px; display: flex; align-items: center; justify-content: center;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .icon-btn:hover { color: var(--text); border-color: var(--accent); background: rgba(108,99,255,0.08); }
 
     /* ── Main screen ── */
-    #main-screen {
-      flex-direction: column;
-      align-items: center;
-      padding: 0 0 40px;
-    }
+    #main-screen { flex-direction: column; align-items: center; padding-bottom: 40px; }
 
     header {
-      width: 100%;
-      background: var(--surface);
+      width: 100%; background: var(--surface);
       border-bottom: 1px solid var(--border);
       padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       position: sticky; top: 0; z-index: 10;
     }
-
     header h1 {
-      font-size: 1.2rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
+      font-size: 1.2rem; font-weight: 700;
       display: flex; align-items: center; gap: 10px;
     }
     header h1 svg { color: var(--accent); }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
 
     .main-content {
-      width: 100%;
-      max-width: 680px;
+      width: 100%; max-width: 680px;
       padding: 24px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+      display: flex; flex-direction: column; gap: 20px;
     }
 
     /* ── Upload zone ── */
     .upload-zone {
       background: var(--surface);
       border: 2px dashed var(--border);
-      border-radius: var(--radius);
+      border-radius: var(--r);
       padding: 36px 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      cursor: pointer; text-align: center;
       transition: border-color 0.2s, background 0.2s;
-      text-align: center;
     }
-    .upload-zone:hover, .upload-zone.dragover {
-      border-color: var(--accent);
-      background: rgba(108, 99, 255, 0.06);
-    }
+    .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: rgba(108,99,255,0.06); }
     .upload-zone svg { color: var(--accent); width: 40px; height: 40px; }
-    .upload-zone .upload-title { font-weight: 600; font-size: 1rem; }
-    .upload-zone .upload-sub { color: var(--text-dim); font-size: 0.8125rem; }
+    .upload-zone .uz-title { font-weight: 600; }
+    .upload-zone .uz-sub   { color: var(--dim); font-size: 0.8125rem; }
     #file-input { display: none; }
 
-    /* ── File info card ── */
+    /* ── File info ── */
     .file-info {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px 18px;
-      display: none;
-      align-items: center;
-      gap: 14px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 16px 18px;
+      display: none; align-items: center; gap: 14px;
     }
-    .file-info.visible { display: flex; }
+    .file-info.show { display: flex; }
     .file-icon {
       width: 44px; height: 44px; flex-shrink: 0;
-      background: rgba(108,99,255,0.15);
-      border-radius: 10px;
+      background: rgba(108,99,255,0.15); border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
       color: var(--accent);
     }
     .file-icon svg { width: 22px; height: 22px; }
     .file-details { flex: 1; overflow: hidden; }
     .file-name {
-      font-weight: 600;
-      font-size: 0.9375rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-weight: 600; font-size: 0.9375rem;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .file-meta { color: var(--text-dim); font-size: 0.8rem; margin-top: 2px; }
-
-    .remove-file {
-      background: none; border: none;
-      color: var(--text-dim); cursor: pointer;
-      padding: 6px; border-radius: 6px;
-      display: flex; align-items: center;
+    .file-meta { color: var(--dim); font-size: 0.8rem; margin-top: 2px; }
+    .remove-btn {
+      background: none; border: none; color: var(--dim); cursor: pointer;
+      padding: 6px; border-radius: 6px; display: flex; align-items: center;
       transition: color 0.15s, background 0.15s;
     }
-    .remove-file:hover { color: var(--danger); background: rgba(239,68,68,0.1); }
+    .remove-btn:hover { color: var(--danger); background: rgba(239,68,68,0.1); }
 
     /* ── Progress ── */
     .progress-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px 18px;
-      display: none;
-      flex-direction: column;
-      gap: 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 20px 18px;
+      display: none; flex-direction: column; gap: 12px;
     }
-    .progress-wrap.visible { display: flex; }
-
-    .progress-header {
-      display: flex; align-items: center; gap: 10px;
-      font-weight: 600; font-size: 0.9375rem;
-    }
-
+    .progress-wrap.show { display: flex; }
+    .progress-head { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9375rem; }
     .spinner {
-      width: 18px; height: 18px;
-      border: 2.5px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.75s linear infinite;
-      flex-shrink: 0;
+      width: 18px; height: 18px; flex-shrink: 0;
+      border: 2.5px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.75s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    .progress-bar-track {
-      background: var(--surface2);
-      border-radius: 999px;
-      height: 6px;
-      overflow: hidden;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 999px;
-      transition: width 0.4s ease;
-      width: 0%;
-    }
-    .progress-label {
-      color: var(--text-dim);
-      font-size: 0.8rem;
-    }
+    .progress-track { background: var(--surface2); border-radius: 999px; height: 6px; overflow: hidden; }
+    .progress-fill  { height: 100%; background: var(--accent); border-radius: 999px; transition: width 0.4s ease; width: 0%; }
+    .progress-label { color: var(--dim); font-size: 0.8rem; }
 
     /* ── Action row ── */
-    .action-row {
-      display: flex;
-      gap: 10px;
-    }
+    .action-row { display: flex; gap: 10px; }
 
-    /* ── Transcript area ── */
-    .transcript-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    /* ── Transcript ── */
+    .section-label {
+      font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim);
     }
-
-    .transcript-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-
+    .transcript-wrap { display: flex; flex-direction: column; gap: 10px; }
     #transcript {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text);
-      font-size: 0.9375rem;
-      line-height: 1.7;
-      min-height: 240px;
-      max-height: 50vh;
-      overflow-y: auto;
-      padding: 16px;
-      resize: vertical;
-      width: 100%;
-      outline: none;
-      transition: border-color 0.2s;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r); color: var(--text);
+      font-size: 0.9375rem; line-height: 1.7;
+      min-height: 240px; max-height: 50vh;
+      overflow-y: auto; padding: 16px; resize: vertical;
+      width: 100%; outline: none; transition: border-color 0.2s;
       font-family: inherit;
     }
     #transcript:focus { border-color: var(--accent); }
-    #transcript::placeholder { color: var(--text-dim); }
-
-    /* Scrollbar */
+    #transcript::placeholder { color: var(--dim); }
     #transcript::-webkit-scrollbar { width: 6px; }
     #transcript::-webkit-scrollbar-track { background: transparent; }
     #transcript::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
     /* ── Toast ── */
     .toast {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
+      position: fixed; bottom: 28px; left: 50%;
       transform: translateX(-50%) translateY(80px);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 12px 20px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      white-space: nowrap;
-      z-index: 100;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--rs); padding: 12px 20px;
+      font-size: 0.875rem; font-weight: 500;
+      white-space: nowrap; z-index: 100;
       transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
-      opacity: 0;
-      pointer-events: none;
+      opacity: 0; pointer-events: none;
       display: flex; align-items: center; gap: 8px;
     }
-    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.show    { transform: translateX(-50%) translateY(0); opacity: 1; }
     .toast.success { border-color: var(--success); color: var(--success); }
     .toast.error   { border-color: var(--danger);  color: var(--danger); }
+
+    /* ── Settings modal ── */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); z-index: 50;
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 28px 24px;
+      width: 100%; max-width: 400px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; }
+    .modal-head h2 { font-size: 1.1rem; font-weight: 700; }
+    .modal-close {
+      background: none; border: none; color: var(--dim); cursor: pointer;
+      padding: 4px; border-radius: 6px; display: flex; align-items: center;
+      transition: color 0.15s;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal p   { color: var(--dim); font-size: 0.875rem; line-height: 1.6; }
+    .modal label {
+      display: block; font-size: 0.8125rem; font-weight: 600;
+      color: var(--dim); text-transform: uppercase;
+      letter-spacing: 0.06em; margin-bottom: 8px;
+    }
+    .key-status {
+      font-size: 0.8rem; padding: 8px 12px;
+      border-radius: var(--rs); text-align: center;
+    }
+    .key-status.saved   { background: rgba(34,197,94,0.1);  color: var(--success); border: 1px solid rgba(34,197,94,0.25); }
+    .key-status.missing { background: rgba(239,68,68,0.08); color: var(--danger);  border: 1px solid rgba(239,68,68,0.2); }
 
     /* ── Responsive ── */
     @media (max-width: 480px) {
@@ -375,79 +290,78 @@
       header { padding: 14px 16px; }
       .upload-zone { padding: 28px 16px; }
       #transcript { min-height: 180px; }
+      .lock-card { padding: 24px 18px; }
+      #lock-screen { padding: 16px; gap: 16px; }
     }
   </style>
 </head>
 <body>
 
-<!-- ════════════════════════════════
-     CONFIGURATION — edit here
-════════════════════════════════ -->
-<script>
-  const OPENAI_API_KEY = "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";
-  const APP_PASSWORD    = "kevin2024";
-  const SESSION_KEY     = "transcriber_auth";
-</script>
-
-<!-- ════════════════ LOCK SCREEN ════════════════ -->
-<div id="lock-screen" class="screen">
+<!-- ════ LOCK SCREEN ════ -->
+<div id="lock-screen" class="screen active">
   <div class="lock-icon">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+      <rect x="3" y="11" width="18" height="11" rx="2"/>
       <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
     </svg>
   </div>
-
   <div class="lock-card">
     <h1>My Transcriber</h1>
     <p>Enter your password to continue.</p>
-
-    <div class="input-group">
+    <div class="input-wrap">
       <input type="password" id="pw-input" placeholder="Password" autocomplete="current-password" />
-      <button class="toggle-pw" id="pw-toggle" aria-label="Show password" type="button">
-        <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button class="eye-btn" id="pw-eye" type="button" aria-label="Show password">
+        <svg id="pw-eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
           <circle cx="12" cy="12" r="3"/>
         </svg>
       </button>
     </div>
-
     <div class="error-msg" id="pw-error"></div>
     <button class="btn btn-primary" id="pw-submit">Unlock</button>
   </div>
 </div>
 
-<!-- ════════════════ MAIN SCREEN ════════════════ -->
+<!-- ════ MAIN SCREEN ════ -->
 <div id="main-screen" class="screen">
   <header>
     <h1>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
         <line x1="8" y1="23" x2="16" y2="23"/>
       </svg>
       My Transcriber
     </h1>
-    <button class="btn btn-secondary" id="lock-btn" style="flex:0;padding:9px 14px;font-size:0.8rem;" title="Lock">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-      </svg>
-      Lock
-    </button>
+    <div class="header-actions">
+      <button class="icon-btn" id="settings-btn" title="Settings">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+      <button class="btn btn-secondary" id="lock-btn" style="flex:0;padding:9px 14px;font-size:0.8rem;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        Lock
+      </button>
+    </div>
   </header>
 
   <div class="main-content">
 
-    <!-- Upload zone -->
+    <!-- Upload -->
     <div class="upload-zone" id="upload-zone" role="button" tabindex="0" aria-label="Select audio file">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
         <polyline points="17 8 12 3 7 8"/>
         <line x1="12" y1="3" x2="12" y2="15"/>
       </svg>
-      <span class="upload-title">Select an audio file</span>
-      <span class="upload-sub">MP3, M4A, WAV, FLAC, OGG, WEBM &mdash; large files split automatically</span>
+      <span class="uz-title">Select an audio file</span>
+      <span class="uz-sub">MP3, M4A, WAV, FLAC, OGG, WEBM &mdash; large files split automatically</span>
       <input type="file" id="file-input" accept="audio/*,video/mp4,video/webm" />
     </div>
 
@@ -456,21 +370,23 @@
       <div class="file-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 18V5l12-2v13"/>
-          <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+          <circle cx="6" cy="18" r="3"/>
+          <circle cx="18" cy="16" r="3"/>
         </svg>
       </div>
       <div class="file-details">
         <div class="file-name" id="file-name">—</div>
         <div class="file-meta" id="file-meta">—</div>
       </div>
-      <button class="remove-file" id="remove-file" title="Remove file">
+      <button class="remove-btn" id="remove-file" title="Remove file">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
     </div>
 
-    <!-- Action row -->
+    <!-- Transcribe button -->
     <div class="action-row">
       <button class="btn btn-primary" id="transcribe-btn" disabled style="flex:1;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -482,34 +398,35 @@
 
     <!-- Progress -->
     <div class="progress-wrap" id="progress-wrap">
-      <div class="progress-header">
+      <div class="progress-head">
         <div class="spinner"></div>
-        <span id="progress-text">Uploading to Whisper…</span>
+        <span id="progress-text">Preparing…</span>
       </div>
-      <div class="progress-bar-track">
-        <div class="progress-bar-fill" id="progress-fill"></div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
       </div>
       <div class="progress-label" id="progress-label">This may take a moment for longer recordings.</div>
     </div>
 
     <!-- Transcript -->
     <div class="transcript-wrap">
-      <div class="transcript-label">Transcript</div>
+      <div class="section-label">Transcript</div>
       <textarea id="transcript" placeholder="Your transcript will appear here after transcription…" readonly></textarea>
     </div>
 
-    <!-- Copy button -->
+    <!-- Copy / Clear -->
     <div class="action-row">
       <button class="btn btn-secondary" id="clear-btn" disabled>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
           <path d="M10 11v6"/><path d="M14 11v6"/>
         </svg>
         Clear
       </button>
       <button class="btn btn-success" id="copy-btn" disabled>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <rect x="9" y="9" width="13" height="13" rx="2"/>
           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
         </svg>
         Copy to Clipboard
@@ -519,363 +436,436 @@
   </div>
 </div>
 
+<!-- ════ SETTINGS MODAL ════ -->
+<div class="modal-backdrop" id="settings-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head">
+      <h2 id="modal-title">Settings</h2>
+      <button class="modal-close" id="settings-close" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <p>Your API key is stored only in this browser's localStorage and never sent anywhere except directly to OpenAI.</p>
+    <div id="key-status" class="key-status missing">No API key saved yet.</div>
+    <div>
+      <label for="api-key-input">OpenAI API Key</label>
+      <div class="input-wrap">
+        <input type="password" id="api-key-input" placeholder="sk-..." autocomplete="off" spellcheck="false" />
+        <button class="eye-btn" id="api-eye" type="button" aria-label="Show key">
+          <svg id="api-eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-secondary" id="settings-clear" style="font-size:0.875rem;">Remove Key</button>
+      <button class="btn btn-primary" id="settings-save" style="width:auto;flex:2;">Save Key</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- ════════════════ SCRIPT ════════════════ -->
 <script>
 (function () {
-  "use strict";
+  'use strict';
 
-  /* ── DOM refs ── */
-  const lockScreen    = document.getElementById("lock-screen");
-  const mainScreen    = document.getElementById("main-screen");
-  const pwInput       = document.getElementById("pw-input");
-  const pwToggle      = document.getElementById("pw-toggle");
-  const eyeIcon       = document.getElementById("eye-icon");
-  const pwSubmit      = document.getElementById("pw-submit");
-  const pwError       = document.getElementById("pw-error");
-  const lockBtn       = document.getElementById("lock-btn");
+  var APP_PASSWORD    = 'kevin2024';
+  var SESSION_KEY     = 'transcriber_auth';
+  var API_KEY_STORAGE = 'transcriber_openai_key';
+  var CHUNK_LIMIT     = 24 * 1024 * 1024; // 24 MB
+  var CHUNK_RATE      = 16000;             // 16 kHz mono
 
-  const uploadZone    = document.getElementById("upload-zone");
-  const fileInput     = document.getElementById("file-input");
-  const fileInfoEl    = document.getElementById("file-info");
-  const fileNameEl    = document.getElementById("file-name");
-  const fileMetaEl    = document.getElementById("file-meta");
-  const removeFileBtn = document.getElementById("remove-file");
-  const transcribeBtn = document.getElementById("transcribe-btn");
-  const progressWrap  = document.getElementById("progress-wrap");
-  const progressText  = document.getElementById("progress-text");
-  const progressFill  = document.getElementById("progress-fill");
-  const progressLabel = document.getElementById("progress-label");
-  const transcriptEl  = document.getElementById("transcript");
-  const copyBtn       = document.getElementById("copy-btn");
-  const clearBtn      = document.getElementById("clear-btn");
-  const toastEl       = document.getElementById("toast");
+  /* ── DOM ── */
+  var lockScreen    = document.getElementById('lock-screen');
+  var mainScreen    = document.getElementById('main-screen');
+  var pwInput       = document.getElementById('pw-input');
+  var pwEye         = document.getElementById('pw-eye');
+  var pwEyeIcon     = document.getElementById('pw-eye-icon');
+  var pwSubmit      = document.getElementById('pw-submit');
+  var pwError       = document.getElementById('pw-error');
+  var lockBtn       = document.getElementById('lock-btn');
+  var settingsBtn   = document.getElementById('settings-btn');
+  var settingsModal = document.getElementById('settings-modal');
+  var settingsClose = document.getElementById('settings-close');
+  var settingsSave  = document.getElementById('settings-save');
+  var settingsClear = document.getElementById('settings-clear');
+  var apiKeyInput   = document.getElementById('api-key-input');
+  var apiEye        = document.getElementById('api-eye');
+  var apiEyeIcon    = document.getElementById('api-eye-icon');
+  var keyStatus     = document.getElementById('key-status');
+  var uploadZone    = document.getElementById('upload-zone');
+  var fileInput     = document.getElementById('file-input');
+  var fileInfoEl    = document.getElementById('file-info');
+  var fileNameEl    = document.getElementById('file-name');
+  var fileMetaEl    = document.getElementById('file-meta');
+  var removeFileBtn = document.getElementById('remove-file');
+  var transcribeBtn = document.getElementById('transcribe-btn');
+  var progressWrap  = document.getElementById('progress-wrap');
+  var progressText  = document.getElementById('progress-text');
+  var progressFill  = document.getElementById('progress-fill');
+  var progressLabel = document.getElementById('progress-label');
+  var transcriptEl  = document.getElementById('transcript');
+  var copyBtn       = document.getElementById('copy-btn');
+  var clearBtn      = document.getElementById('clear-btn');
+  var toastEl       = document.getElementById('toast');
 
-  let selectedFile = null;
-  let toastTimer   = null;
+  var selectedFile  = null;
+  var toastTimer    = null;
+  var animFrame     = null;
 
   /* ── Auth ── */
   function showScreen(id) {
-    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-    document.getElementById(id).classList.add("active");
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
   }
 
-  function isAuthenticated() {
-    return localStorage.getItem(SESSION_KEY) === "1";
-  }
-
-  function authenticate() {
-    localStorage.setItem(SESSION_KEY, "1");
-    showScreen("main-screen");
-  }
-
-  function lock() {
+  function isAuthed() { return localStorage.getItem(SESSION_KEY) === '1'; }
+  function login()    { localStorage.setItem(SESSION_KEY, '1'); showScreen('main-screen'); }
+  function logout()   {
     localStorage.removeItem(SESSION_KEY);
-    showScreen("lock-screen");
-    pwInput.value = "";
-    pwError.textContent = "";
+    showScreen('lock-screen');
+    pwInput.value = '';
+    pwError.textContent = '';
+    setTimeout(function() { pwInput.focus(); }, 100);
   }
-
-  /* ── Password UI ── */
-  pwToggle.addEventListener("click", () => {
-    const isHidden = pwInput.type === "password";
-    pwInput.type = isHidden ? "text" : "password";
-    eyeIcon.innerHTML = isHidden
-      ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`
-      : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
-  });
 
   function tryUnlock() {
-    const val = pwInput.value.trim();
-    if (!val) { pwError.textContent = "Please enter the password."; return; }
+    var val = pwInput.value.trim();
+    if (!val) { pwError.textContent = 'Please enter the password.'; return; }
     if (val === APP_PASSWORD) {
-      pwError.textContent = "";
-      authenticate();
+      pwError.textContent = '';
+      login();
     } else {
-      pwError.textContent = "Incorrect password. Try again.";
-      pwInput.value = "";
+      pwError.textContent = 'Incorrect password. Try again.';
+      pwInput.value = '';
       pwInput.focus();
     }
   }
 
-  pwSubmit.addEventListener("click", tryUnlock);
-  pwInput.addEventListener("keydown", e => { if (e.key === "Enter") tryUnlock(); });
-  lockBtn.addEventListener("click", lock);
+  pwSubmit.addEventListener('click', tryUnlock);
+  pwInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') tryUnlock(); });
+  lockBtn.addEventListener('click', logout);
 
-  /* ── File selection ── */
-  uploadZone.addEventListener("click", () => fileInput.click());
-  uploadZone.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") fileInput.click(); });
+  /* ── Password eye toggle ── */
+  var EYE_OPEN   = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  var EYE_CLOSED = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
 
-  uploadZone.addEventListener("dragover", e => { e.preventDefault(); uploadZone.classList.add("dragover"); });
-  uploadZone.addEventListener("dragleave", () => uploadZone.classList.remove("dragover"));
-  uploadZone.addEventListener("drop", e => {
-    e.preventDefault();
-    uploadZone.classList.remove("dragover");
-    const f = e.dataTransfer.files[0];
-    if (f) handleFile(f);
+  pwEye.addEventListener('click', function() {
+    var hide = pwInput.type === 'password';
+    pwInput.type = hide ? 'text' : 'password';
+    pwEyeIcon.innerHTML = hide ? EYE_CLOSED : EYE_OPEN;
   });
 
-  fileInput.addEventListener("change", () => {
+  /* ── Settings ── */
+  function getApiKey() { return localStorage.getItem(API_KEY_STORAGE) || ''; }
+
+  function refreshKeyStatus() {
+    var key = getApiKey();
+    if (key) {
+      keyStatus.className = 'key-status saved';
+      keyStatus.textContent = 'API key saved (' + key.slice(0, 7) + '...)';
+    } else {
+      keyStatus.className = 'key-status missing';
+      keyStatus.textContent = 'No API key saved yet.';
+    }
+  }
+
+  function openSettings() {
+    refreshKeyStatus();
+    apiKeyInput.value = '';
+    apiKeyInput.type = 'password';
+    apiEyeIcon.innerHTML = EYE_OPEN;
+    settingsModal.classList.add('open');
+    setTimeout(function() { apiKeyInput.focus(); }, 60);
+  }
+
+  function closeSettings() { settingsModal.classList.remove('open'); }
+
+  settingsBtn.addEventListener('click', openSettings);
+  settingsClose.addEventListener('click', closeSettings);
+  settingsModal.addEventListener('click', function(e) { if (e.target === settingsModal) closeSettings(); });
+
+  apiEye.addEventListener('click', function() {
+    var hide = apiKeyInput.type === 'password';
+    apiKeyInput.type = hide ? 'text' : 'password';
+    apiEyeIcon.innerHTML = hide ? EYE_CLOSED : EYE_OPEN;
+  });
+
+  settingsSave.addEventListener('click', function() {
+    var val = apiKeyInput.value.trim();
+    if (!val) { showToast('Please enter an API key.', 'error'); return; }
+    if (!val.startsWith('sk-')) { showToast('Key should start with sk-', 'error'); return; }
+    localStorage.setItem(API_KEY_STORAGE, val);
+    apiKeyInput.value = '';
+    refreshKeyStatus();
+    showToast('API key saved.', 'success');
+    closeSettings();
+  });
+
+  settingsClear.addEventListener('click', function() {
+    localStorage.removeItem(API_KEY_STORAGE);
+    apiKeyInput.value = '';
+    refreshKeyStatus();
+    showToast('API key removed.');
+  });
+
+  /* ── File handling ── */
+  uploadZone.addEventListener('click', function() { fileInput.click(); });
+  uploadZone.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+  uploadZone.addEventListener('dragover', function(e) { e.preventDefault(); uploadZone.classList.add('drag'); });
+  uploadZone.addEventListener('dragleave', function() { uploadZone.classList.remove('drag'); });
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    uploadZone.classList.remove('drag');
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', function() {
     if (fileInput.files[0]) handleFile(fileInput.files[0]);
   });
-
-  removeFileBtn.addEventListener("click", clearFile);
+  removeFileBtn.addEventListener('click', clearFile);
 
   function handleFile(file) {
     selectedFile = file;
     fileNameEl.textContent = file.name;
-    fileMetaEl.textContent = formatSize(file.size) + " • Loading duration…";
-    fileInfoEl.classList.add("visible");
+    fileMetaEl.textContent = fmtSize(file.size) + ' \u2022 Loading...';
+    fileInfoEl.classList.add('show');
     transcribeBtn.disabled = false;
-    getAudioDuration(file).then(dur => {
-      fileMetaEl.textContent = formatSize(file.size) + (dur ? " • " + formatDuration(dur) : "");
+    getAudioDuration(file).then(function(dur) {
+      fileMetaEl.textContent = fmtSize(file.size) + (dur ? ' \u2022 ' + fmtDuration(dur) : '');
     });
   }
 
   function clearFile() {
     selectedFile = null;
-    fileInput.value = "";
-    fileInfoEl.classList.remove("visible");
+    fileInput.value = '';
+    fileInfoEl.classList.remove('show');
     transcribeBtn.disabled = true;
   }
 
-  function formatSize(bytes) {
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-    return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+  function fmtSize(bytes) {
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(2) + ' MB';
   }
 
-  function formatDuration(secs) {
-    const h = Math.floor(secs / 3600);
-    const m = Math.floor((secs % 3600) / 60);
-    const s = Math.floor(secs % 60);
-    if (h > 0) return `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-    return `${m}:${String(s).padStart(2,"0")}`;
+  function fmtDuration(secs) {
+    var h = Math.floor(secs / 3600);
+    var m = Math.floor((secs % 3600) / 60);
+    var s = Math.floor(secs % 60);
+    if (h > 0) return h + ':' + pad(m) + ':' + pad(s);
+    return m + ':' + pad(s);
   }
+
+  function pad(n) { return String(n).padStart(2, '0'); }
 
   function getAudioDuration(file) {
-    return new Promise(resolve => {
-      const url = URL.createObjectURL(file);
-      const audio = new Audio();
-      audio.preload = "metadata";
-      audio.onloadedmetadata = () => { URL.revokeObjectURL(url); resolve(audio.duration); };
-      audio.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+    return new Promise(function(resolve) {
+      var url = URL.createObjectURL(file);
+      var audio = new Audio();
+      audio.preload = 'metadata';
+      audio.onloadedmetadata = function() { URL.revokeObjectURL(url); resolve(audio.duration); };
+      audio.onerror = function() { URL.revokeObjectURL(url); resolve(null); };
       audio.src = url;
     });
   }
 
-  /* ── Transcription ── */
-  transcribeBtn.addEventListener("click", transcribe);
-
-  const CHUNK_LIMIT = 24 * 1024 * 1024; // 24 MB — stay under Whisper's 25 MB limit
-  const CHUNK_SAMPLE_RATE = 16000;       // 16 kHz mono is ideal for speech recognition
-
-  // Encode a Float32Array of mono samples as a WAV Blob
-  function encodeWAV(samples, sampleRate) {
-    const numSamples = samples.length;
-    const buffer = new ArrayBuffer(44 + numSamples * 2);
-    const view = new DataView(buffer);
-    const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
-    writeStr(0, "RIFF");
-    view.setUint32(4, 36 + numSamples * 2, true);
-    writeStr(8, "WAVE");
-    writeStr(12, "fmt ");
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);   // PCM
-    view.setUint16(22, 1, true);   // mono
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * 2, true);
-    view.setUint16(32, 2, true);
-    view.setUint16(34, 16, true);
-    writeStr(36, "data");
-    view.setUint32(40, numSamples * 2, true);
-    let off = 44;
-    for (let i = 0; i < numSamples; i++) {
-      const s = Math.max(-1, Math.min(1, samples[i]));
-      view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  /* ── WAV encoder ── */
+  function encodeWAV(samples, rate) {
+    var n = samples.length;
+    var buf = new ArrayBuffer(44 + n * 2);
+    var v = new DataView(buf);
+    function str(off, s) { for (var i = 0; i < s.length; i++) v.setUint8(off + i, s.charCodeAt(i)); }
+    str(0,  'RIFF'); v.setUint32(4, 36 + n * 2, true);
+    str(8,  'WAVE'); str(12, 'fmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+    v.setUint16(22, 1, true);  v.setUint32(24, rate, true);
+    v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    str(36, 'data'); v.setUint32(40, n * 2, true);
+    var off = 44;
+    for (var i = 0; i < n; i++) {
+      var s = Math.max(-1, Math.min(1, samples[i]));
+      v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
       off += 2;
     }
-    return new Blob([buffer], { type: "audio/wav" });
+    return new Blob([buf], { type: 'audio/wav' });
   }
 
-  // Decode audio file and resample to mono 16 kHz
+  /* ── Decode & resample audio ── */
   async function decodeAudio(file) {
-    const arrayBuffer = await file.arrayBuffer();
-    const audioCtx = new AudioContext();
-    const decoded = await audioCtx.decodeAudioData(arrayBuffer);
-    await audioCtx.close();
-    const duration = decoded.duration;
-    const offCtx = new OfflineAudioContext(1, Math.ceil(CHUNK_SAMPLE_RATE * duration), CHUNK_SAMPLE_RATE);
-    const src = offCtx.createBufferSource();
+    var ab = await file.arrayBuffer();
+    var ctx = new AudioContext();
+    var decoded = await ctx.decodeAudioData(ab);
+    await ctx.close();
+    var off = new OfflineAudioContext(1, Math.ceil(CHUNK_RATE * decoded.duration), CHUNK_RATE);
+    var src = off.createBufferSource();
     src.buffer = decoded;
-    src.connect(offCtx.destination);
+    src.connect(off.destination);
     src.start(0);
-    return await offCtx.startRendering();
+    return await off.startRendering();
   }
 
-  // Send a single Blob to Whisper API and return transcript text
+  /* ── Whisper API call ── */
   async function whisperRequest(blob, filename) {
-    const formData = new FormData();
-    formData.append("file", blob, filename);
-    formData.append("model", "whisper-1");
-    formData.append("response_format", "text");
-    const res = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + OPENAI_API_KEY },
-      body: formData,
+    var fd = new FormData();
+    fd.append('file', blob, filename);
+    fd.append('model', 'whisper-1');
+    fd.append('response_format', 'text');
+    var res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + getApiKey() },
+      body: fd
     });
     if (!res.ok) {
-      let msg = `API error ${res.status}`;
-      try { const err = await res.json(); msg = err?.error?.message || msg; } catch (_) {}
+      var msg = 'API error ' + res.status;
+      try { var err = await res.json(); msg = (err && err.error && err.error.message) || msg; } catch(e) {}
       throw new Error(msg);
     }
     return (await res.text()).trim();
   }
 
+  /* ── Transcription ── */
+  transcribeBtn.addEventListener('click', transcribe);
+
   async function transcribe() {
     if (!selectedFile) return;
-
-    if (!OPENAI_API_KEY) {
-      showToast("No API key configured. Edit the OPENAI_API_KEY constant at the top of index.html.", "error");
+    if (!getApiKey()) {
+      showToast('No API key set. Open Settings to add your OpenAI key.', 'error');
+      openSettings();
       return;
     }
-
     setTranscribing(true);
-    progressFill.style.width = "0%";
-    progressText.textContent = "Preparing file…";
-    progressLabel.textContent = "This may take a moment for longer recordings.";
-    transcriptEl.value = "";
+    progressFill.style.width = '0%';
+    progressText.textContent = 'Preparing file...';
+    progressLabel.textContent = 'This may take a moment for longer recordings.';
+    transcriptEl.value = '';
 
     try {
-      let fullText;
+      var fullText;
 
       if (selectedFile.size <= CHUNK_LIMIT) {
-        // ── Small file: send directly ──────────────────────────────────────
         animateProgress(0, 55, 2000);
-        progressText.textContent = "Sending to Whisper…";
+        progressText.textContent = 'Sending to Whisper...';
         animateProgress(55, 85, 8000);
-        progressText.textContent = "Transcribing…";
+        progressText.textContent = 'Transcribing...';
         fullText = await whisperRequest(selectedFile, selectedFile.name);
         animateProgress(85, 100, 600);
 
       } else {
-        // ── Large file: decode → chunk → transcribe each chunk ─────────────
-        progressText.textContent = "Decoding audio…";
-        progressLabel.textContent = "Resampling large file before splitting.";
+        progressText.textContent = 'Decoding audio...';
+        progressLabel.textContent = 'Resampling large file before splitting.';
         animateProgress(0, 10, 3000);
 
-        const audioBuffer = await decodeAudio(selectedFile);
-        const allSamples = audioBuffer.getChannelData(0);
-        const totalSamples = allSamples.length;
+        var audioBuffer = await decodeAudio(selectedFile);
+        var allSamples = audioBuffer.getChannelData(0);
+        var total = allSamples.length;
+        var maxPer = Math.floor((CHUNK_LIMIT - 44) / 2);
+        var numChunks = Math.ceil(total / maxPer);
+        var chunkSecs = maxPer / CHUNK_RATE;
 
-        // Max samples that fit in CHUNK_LIMIT as 16-bit PCM WAV
-        const maxSamplesPerChunk = Math.floor((CHUNK_LIMIT - 44) / 2);
-        const numChunks = Math.ceil(totalSamples / maxSamplesPerChunk);
+        progressLabel.textContent = 'Splitting into ' + numChunks + ' chunks (~' + Math.round(chunkSecs / 60) + ' min each).';
 
-        const chunkDurationSecs = maxSamplesPerChunk / CHUNK_SAMPLE_RATE;
-        const totalDurationMins = Math.round(totalSamples / CHUNK_SAMPLE_RATE / 60);
-        progressLabel.textContent = `Splitting into ${numChunks} chunks (~${Math.round(chunkDurationSecs / 60)} min each).`;
+        var parts = [];
+        for (var i = 0; i < numChunks; i++) {
+          var pStart = 10 + (i / numChunks) * 85;
+          var pEnd   = 10 + ((i + 1) / numChunks) * 85;
+          progressText.textContent = 'Transcribing chunk ' + (i + 1) + ' of ' + numChunks + '...';
+          animateProgress(pStart, pEnd - 2, Math.max(3000, chunkSecs * 200));
 
-        const parts = [];
-        for (let i = 0; i < numChunks; i++) {
-          const pctStart = 10 + (i / numChunks) * 85;
-          const pctEnd   = 10 + ((i + 1) / numChunks) * 85;
-          progressText.textContent = `Transcribing chunk ${i + 1} of ${numChunks}…`;
-          animateProgress(pctStart, pctEnd - 2, Math.max(3000, chunkDurationSecs * 200));
-
-          const start = i * maxSamplesPerChunk;
-          const end   = Math.min(start + maxSamplesPerChunk, totalSamples);
-          const chunk = allSamples.slice(start, end);
-          const blob  = encodeWAV(chunk, CHUNK_SAMPLE_RATE);
-          parts.push(await whisperRequest(blob, `chunk_${i + 1}.wav`));
-
-          animateProgress(pctEnd - 2, pctEnd, 400);
+          var start = i * maxPer;
+          var end   = Math.min(start + maxPer, total);
+          var chunk = allSamples.slice(start, end);
+          var blob  = encodeWAV(chunk, CHUNK_RATE);
+          parts.push(await whisperRequest(blob, 'chunk_' + (i + 1) + '.wav'));
+          animateProgress(pEnd - 2, pEnd, 400);
         }
 
-        fullText = parts.join(" ");
+        fullText = parts.join(' ');
         animateProgress(95, 100, 400);
       }
 
       transcriptEl.value = fullText;
-      transcriptEl.removeAttribute("readonly");
+      transcriptEl.removeAttribute('readonly');
       copyBtn.disabled = false;
       clearBtn.disabled = false;
-      progressText.textContent = "Done!";
-      progressFill.style.width = "100%";
-      showToast("Transcription complete.", "success");
-      setTimeout(() => setTranscribing(false), 800);
+      progressText.textContent = 'Done!';
+      progressFill.style.width = '100%';
+      showToast('Transcription complete.', 'success');
+      setTimeout(function() { setTranscribing(false); }, 800);
 
-    } catch (err) {
+    } catch(err) {
       console.error(err);
-      progressWrap.classList.remove("visible");
-      showToast("Error: " + err.message, "error");
+      progressWrap.classList.remove('show');
+      showToast('Error: ' + err.message, 'error');
       setTranscribing(false);
     }
   }
 
-  let progressAnim = null;
   function animateProgress(from, to, duration) {
-    if (progressAnim) cancelAnimationFrame(progressAnim);
-    const start = performance.now();
-    const current = parseFloat(progressFill.style.width) || from;
+    if (animFrame) cancelAnimationFrame(animFrame);
+    var start = performance.now();
+    var current = parseFloat(progressFill.style.width) || from;
     function step(now) {
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      progressFill.style.width = (current + (to - current) * eased) + "%";
-      if (t < 1) progressAnim = requestAnimationFrame(step);
+      var t = Math.min(1, (now - start) / duration);
+      var e = 1 - Math.pow(1 - t, 3);
+      progressFill.style.width = (current + (to - current) * e) + '%';
+      if (t < 1) animFrame = requestAnimationFrame(step);
     }
-    progressAnim = requestAnimationFrame(step);
+    animFrame = requestAnimationFrame(step);
   }
 
   function setTranscribing(active) {
-    transcribeBtn.disabled = active;
-    uploadZone.style.pointerEvents = active ? "none" : "";
+    transcribeBtn.disabled = active || !selectedFile;
+    uploadZone.style.pointerEvents = active ? 'none' : '';
     removeFileBtn.disabled = active;
     if (active) {
-      progressWrap.classList.add("visible");
+      progressWrap.classList.add('show');
     } else {
-      setTimeout(() => progressWrap.classList.remove("visible"), 600);
+      setTimeout(function() { progressWrap.classList.remove('show'); }, 600);
     }
   }
 
   /* ── Copy & Clear ── */
-  copyBtn.addEventListener("click", async () => {
-    const text = transcriptEl.value;
+  copyBtn.addEventListener('click', async function() {
+    var text = transcriptEl.value;
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
-      showToast("Copied to clipboard!", "success");
-    } catch (_) {
-      // Fallback for Safari
-      transcriptEl.removeAttribute("readonly");
+      showToast('Copied to clipboard!', 'success');
+    } catch(e) {
+      transcriptEl.removeAttribute('readonly');
       transcriptEl.select();
-      document.execCommand("copy");
-      showToast("Copied to clipboard!", "success");
+      document.execCommand('copy');
+      showToast('Copied to clipboard!', 'success');
     }
   });
 
-  clearBtn.addEventListener("click", () => {
-    transcriptEl.value = "";
-    transcriptEl.setAttribute("readonly", "");
+  clearBtn.addEventListener('click', function() {
+    transcriptEl.value = '';
+    transcriptEl.setAttribute('readonly', '');
     copyBtn.disabled = true;
     clearBtn.disabled = true;
   });
 
   /* ── Toast ── */
-  function showToast(msg, type = "") {
+  function showToast(msg, type) {
     toastEl.textContent = msg;
-    toastEl.className = "toast" + (type ? " " + type : "") + " show";
+    toastEl.className = 'toast' + (type ? ' ' + type : '') + ' show';
     if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { toastEl.classList.remove("show"); }, 3200);
+    toastTimer = setTimeout(function() { toastEl.classList.remove('show'); }, 3200);
   }
 
   /* ── Init ── */
-  if (isAuthenticated()) {
-    showScreen("main-screen");
+  if (isAuthed()) {
+    showScreen('main-screen');
   } else {
-    showScreen("lock-screen");
-    setTimeout(() => pwInput.focus(), 100);
+    showScreen('lock-screen');
+    setTimeout(function() { pwInput.focus(); }, 100);
   }
 
 })();
