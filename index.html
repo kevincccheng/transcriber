@@ -714,7 +714,7 @@
   async function whisperRequest(blob, filename) {
     var fd = new FormData();
     fd.append('file', blob, filename);
-    fd.append('model', 'whisper-1');
+    fd.append('model', 'gpt-4o-mini-transcribe');
     fd.append('response_format', 'text');
     var res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
